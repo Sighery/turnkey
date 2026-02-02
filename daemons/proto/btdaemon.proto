@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/Sighery/turnkey/daemons/protogen/btdaemons";
+
+package btdaemons;
+
+// Daemon service
+service Daemon {
+	rpc IsReady(IsReadyRequest) returns (IsReadyResponse) {}
+}
+
+message IsReadyRequest {}
+
+message IsReadyResponse {
+	bool status = 1;
+}

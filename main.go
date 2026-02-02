@@ -2,40 +2,40 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
-	"os/user"
-	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/godbus/dbus/v5"
 
 	"github.com/Sighery/turnkey/actions"
+	btapi "github.com/Sighery/turnkey/services/btdaemon"
 	lipcapi "github.com/Sighery/turnkey/services/lipc"
 	wtitle "github.com/Sighery/turnkey/services/windowtitles"
 	x11api "github.com/Sighery/turnkey/services/x11"
 )
 
-func UseBluetoothPrivileges() error {
-	user, err := user.Lookup("bluetooth")
-	if err != nil {
-		return err
-	}
-	userId, err := strconv.Atoi(user.Uid)
-	if err != nil {
-		return err
-	}
-	err = syscall.Setuid(userId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
+var (
+	btdaemonAddr = flag.String("btdaemonAddr", "0.0.0.0:50010", "ip:port of the BT daemon")
+)
 
 func main() {
 	log.Printf("Hello World\n")
+
+	flag.Parse()
+
+	btdaemon, err := btapi.NewBtdaemonClient(*btdaemonAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer btdaemon.Close()
+
+	ctx := context.TODO()
+
+	if err := btdaemon.IsReady(ctx); err != nil {
+		log.Fatal(err)
+	}
 
 	dbusConn, err := dbus.SystemBus()
 	if err != nil {
@@ -43,15 +43,12 @@ func main() {
 	}
 	lipc := lipcapi.NewLipcClient(dbusConn)
 
-	ctx := context.TODO()
-
 	orientationProvider := actions.NewLipcOrientationProvider(lipc)
 	orientation, err := orientationProvider.CurrentOrientation(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Lipc Orientation? %d\n", orientation)
-
 
 	x11, err := x11api.OpenX11()
 	if err != nil {
@@ -100,7 +97,6 @@ func main() {
 	} else {
 		log.Printf("Not found component O\n")
 	}
-
 
 	for _, i := range []int{1, 2, 3, 0} {
 		orientation = actions.ScreenOrientation(i * 90)
