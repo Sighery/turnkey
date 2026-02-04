@@ -285,6 +285,118 @@ func (x *ReadCharResponse) GetResponse() []byte {
 	return nil
 }
 
+type WriteCharRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	ConnectionId     string                 `protobuf:"bytes,1,opt,name=connectionId,proto3" json:"connectionId,omitempty"`
+	CharacteristicId string                 `protobuf:"bytes,2,opt,name=characteristicId,proto3" json:"characteristicId,omitempty"`
+	WithResponse     bool                   `protobuf:"varint,3,opt,name=withResponse,proto3" json:"withResponse,omitempty"`
+	Data             []byte                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *WriteCharRequest) Reset() {
+	*x = WriteCharRequest{}
+	mi := &file_btdaemon_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WriteCharRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WriteCharRequest) ProtoMessage() {}
+
+func (x *WriteCharRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_btdaemon_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WriteCharRequest.ProtoReflect.Descriptor instead.
+func (*WriteCharRequest) Descriptor() ([]byte, []int) {
+	return file_btdaemon_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *WriteCharRequest) GetConnectionId() string {
+	if x != nil {
+		return x.ConnectionId
+	}
+	return ""
+}
+
+func (x *WriteCharRequest) GetCharacteristicId() string {
+	if x != nil {
+		return x.CharacteristicId
+	}
+	return ""
+}
+
+func (x *WriteCharRequest) GetWithResponse() bool {
+	if x != nil {
+		return x.WithResponse
+	}
+	return false
+}
+
+func (x *WriteCharRequest) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type WriteCharResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Response      []byte                 `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WriteCharResponse) Reset() {
+	*x = WriteCharResponse{}
+	mi := &file_btdaemon_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WriteCharResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WriteCharResponse) ProtoMessage() {}
+
+func (x *WriteCharResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_btdaemon_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WriteCharResponse.ProtoReflect.Descriptor instead.
+func (*WriteCharResponse) Descriptor() ([]byte, []int) {
+	return file_btdaemon_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *WriteCharResponse) GetResponse() []byte {
+	if x != nil {
+		return x.Response
+	}
+	return nil
+}
+
 var File_btdaemon_proto protoreflect.FileDescriptor
 
 const file_btdaemon_proto_rawDesc = "" +
@@ -301,12 +413,20 @@ const file_btdaemon_proto_rawDesc = "" +
 	"\fconnectionId\x18\x01 \x01(\tR\fconnectionId\x12*\n" +
 	"\x10characteristicId\x18\x02 \x01(\tR\x10characteristicId\".\n" +
 	"\x10ReadCharResponse\x12\x1a\n" +
-	"\bresponse\x18\x01 \x01(\fR\bresponse2\xe0\x01\n" +
+	"\bresponse\x18\x01 \x01(\fR\bresponse\"\x9a\x01\n" +
+	"\x10WriteCharRequest\x12\"\n" +
+	"\fconnectionId\x18\x01 \x01(\tR\fconnectionId\x12*\n" +
+	"\x10characteristicId\x18\x02 \x01(\tR\x10characteristicId\x12\"\n" +
+	"\fwithResponse\x18\x03 \x01(\bR\fwithResponse\x12\x12\n" +
+	"\x04data\x18\x04 \x01(\fR\x04data\"/\n" +
+	"\x11WriteCharResponse\x12\x1a\n" +
+	"\bresponse\x18\x01 \x01(\fR\bresponse2\xaa\x02\n" +
 	"\x06Daemon\x12B\n" +
 	"\aIsReady\x12\x19.btdaemons.IsReadyRequest\x1a\x1a.btdaemons.IsReadyResponse\"\x00\x12K\n" +
 	"\n" +
 	"ConnectBle\x12\x1c.btdaemons.ConnectBleRequest\x1a\x1d.btdaemons.ConnectBleResponse\"\x00\x12E\n" +
-	"\bReadChar\x12\x1a.btdaemons.ReadCharRequest\x1a\x1b.btdaemons.ReadCharResponse\"\x00B7Z5github.com/Sighery/turnkey/daemons/protogen/btdaemonsb\x06proto3"
+	"\bReadChar\x12\x1a.btdaemons.ReadCharRequest\x1a\x1b.btdaemons.ReadCharResponse\"\x00\x12H\n" +
+	"\tWriteChar\x12\x1b.btdaemons.WriteCharRequest\x1a\x1c.btdaemons.WriteCharResponse\"\x00B7Z5github.com/Sighery/turnkey/daemons/protogen/btdaemonsb\x06proto3"
 
 var (
 	file_btdaemon_proto_rawDescOnce sync.Once
@@ -320,7 +440,7 @@ func file_btdaemon_proto_rawDescGZIP() []byte {
 	return file_btdaemon_proto_rawDescData
 }
 
-var file_btdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_btdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_btdaemon_proto_goTypes = []any{
 	(*IsReadyRequest)(nil),     // 0: btdaemons.IsReadyRequest
 	(*IsReadyResponse)(nil),    // 1: btdaemons.IsReadyResponse
@@ -328,16 +448,20 @@ var file_btdaemon_proto_goTypes = []any{
 	(*ConnectBleResponse)(nil), // 3: btdaemons.ConnectBleResponse
 	(*ReadCharRequest)(nil),    // 4: btdaemons.ReadCharRequest
 	(*ReadCharResponse)(nil),   // 5: btdaemons.ReadCharResponse
+	(*WriteCharRequest)(nil),   // 6: btdaemons.WriteCharRequest
+	(*WriteCharResponse)(nil),  // 7: btdaemons.WriteCharResponse
 }
 var file_btdaemon_proto_depIdxs = []int32{
 	0, // 0: btdaemons.Daemon.IsReady:input_type -> btdaemons.IsReadyRequest
 	2, // 1: btdaemons.Daemon.ConnectBle:input_type -> btdaemons.ConnectBleRequest
 	4, // 2: btdaemons.Daemon.ReadChar:input_type -> btdaemons.ReadCharRequest
-	1, // 3: btdaemons.Daemon.IsReady:output_type -> btdaemons.IsReadyResponse
-	3, // 4: btdaemons.Daemon.ConnectBle:output_type -> btdaemons.ConnectBleResponse
-	5, // 5: btdaemons.Daemon.ReadChar:output_type -> btdaemons.ReadCharResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	6, // 3: btdaemons.Daemon.WriteChar:input_type -> btdaemons.WriteCharRequest
+	1, // 4: btdaemons.Daemon.IsReady:output_type -> btdaemons.IsReadyResponse
+	3, // 5: btdaemons.Daemon.ConnectBle:output_type -> btdaemons.ConnectBleResponse
+	5, // 6: btdaemons.Daemon.ReadChar:output_type -> btdaemons.ReadCharResponse
+	7, // 7: btdaemons.Daemon.WriteChar:output_type -> btdaemons.WriteCharResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -354,7 +478,7 @@ func file_btdaemon_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_btdaemon_proto_rawDesc), len(file_btdaemon_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

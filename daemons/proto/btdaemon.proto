@@ -9,6 +9,7 @@ service Daemon {
 	rpc IsReady(IsReadyRequest) returns (IsReadyResponse) {}
 	rpc ConnectBle(ConnectBleRequest) returns (ConnectBleResponse) {}
 	rpc ReadChar(ReadCharRequest) returns (ReadCharResponse) {}
+	rpc WriteChar(WriteCharRequest) returns (WriteCharResponse) {}
 }
 
 message IsReadyRequest {}
@@ -31,5 +32,16 @@ message ReadCharRequest {
 }
 
 message ReadCharResponse {
+	bytes response = 1;
+}
+
+message WriteCharRequest {
+	string connectionId = 1;
+	string characteristicId = 2;
+	bool withResponse = 3;
+	bytes data = 4;
+}
+
+message WriteCharResponse {
 	bytes response = 1;
 }

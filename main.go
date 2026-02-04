@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -18,6 +19,11 @@ import (
 
 var (
 	btdaemonAddr = flag.String("btdaemonAddr", "0.0.0.0:50010", "ip:port of the BT daemon")
+)
+
+var (
+	OnVal  = []byte{0x4F, 0x46, 0x46}
+	OffVal = []byte{0x4F, 0x4E}
 )
 
 func main() {
@@ -53,6 +59,18 @@ func main() {
 	} else {
 		fmt.Printf("Char response: %v\n", charVal)
 	}
+
+	var toWrite []byte
+	if bytes.Equal(charVal, OffVal) {
+		toWrite = OnVal
+	} else {
+		toWrite = OffVal
+	}
+	res, err := btdaemon.WriteChar(ctx, bleConn, "ff120000000000000000000000000000", true, toWrite)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Write response: %v\n", res)
 
 	dbusConn, err := dbus.SystemBus()
 	if err != nil {

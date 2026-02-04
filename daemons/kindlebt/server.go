@@ -191,3 +191,47 @@ func (s *DaemonService) ReadChar(_ context.Context, req *pb.ReadCharRequest) (
 
 	return &pb.ReadCharResponse{Response: blob.V}, nil
 }
+
+func (s *DaemonService) WriteChar(_ context.Context, req *pb.WriteCharRequest) (
+	*pb.WriteCharResponse, error,
+) {
+	log.Println("Received WriteChar request")
+
+	connId := req.GetConnectionId()
+	charId := req.GetCharacteristicId()
+	withResponse := req.GetWithResponse()
+	data := req.GetData()
+
+	conn, err := getConnection(connId)
+	if err != nil {
+		return &pb.WriteCharResponse{}, fmt.Errorf("Connection %s not registered: %w", connId, err)
+	}
+
+	uuid, err := kbt.NewCharacteristicUuidFromString(charId)
+	if err != nil {
+		return &pb.WriteCharResponse{}, fmt.Errorf("Characteristic UUID invalid: %w", err)
+	}
+
+	value := kbt.CharacteristicValueBlob{V: data}
+
+	if !withResponse {
+		err = s.adapter.WriteCharacteristicWithoutResponse(conn.session, conn.conn, uuid, value)
+		if err != nil {
+			return &pb.WriteCharResponse{}, fmt.Errorf("Couldn't write characteristic: %w", err)
+		}
+
+		return &pb.WriteCharResponse{Response: []byte{}}, nil
+	} else {
+		res, err := s.adapter.WriteCharacteristicWithResponse(conn.session, conn.conn, uuid, value)
+		if err != nil {
+			return &pb.WriteCharResponse{}, fmt.Errorf("Couldn't write characteristic: %w", err)
+		}
+
+		blob, ok := res.Value.(kbt.CharacteristicValueBlob)
+		if !ok {
+			return &pb.WriteCharResponse{}, fmt.Errorf("Non-blob values not implemented")
+		}
+
+		return &pb.WriteCharResponse{Response: blob.V}, nil
+	}
+}

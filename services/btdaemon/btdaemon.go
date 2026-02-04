@@ -48,10 +48,30 @@ func (c *BtdaemonClient) Connect(ctx context.Context, addr string) (string, erro
 	return r.GetConnectionId(), nil
 }
 
-func (c *BtdaemonClient) ReadChar(ctx context.Context, conn string, uuid string) ([]byte, error) {
+func (c *BtdaemonClient) ReadChar(ctx context.Context, connId string, charId string) (
+	[]byte, error,
+) {
 	r, err := c.service.ReadChar(
-		ctx, &pb.ReadCharRequest{ConnectionId: conn, CharacteristicId: uuid},
+		ctx, &pb.ReadCharRequest{ConnectionId: connId, CharacteristicId: charId},
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetResponse(), nil
+}
+
+func (c *BtdaemonClient) WriteChar(
+	ctx context.Context, connId string, charId string, withResponse bool, data []byte,
+) ([]byte, error) {
+	body := &pb.WriteCharRequest{
+		ConnectionId:     connId,
+		CharacteristicId: charId,
+		WithResponse:     withResponse,
+		Data:             data,
+	}
+
+	r, err := c.service.WriteChar(ctx, body)
 	if err != nil {
 		return nil, err
 	}
