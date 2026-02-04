@@ -8,6 +8,7 @@ package btdaemons;
 service Daemon {
 	rpc IsReady(IsReadyRequest) returns (IsReadyResponse) {}
 	rpc ConnectBle(ConnectBleRequest) returns (ConnectBleResponse) {}
+	rpc ReadChar(ReadCharRequest) returns (ReadCharResponse) {}
 }
 
 message IsReadyRequest {}
@@ -22,4 +23,13 @@ message ConnectBleRequest {
 
 message ConnectBleResponse {
 	string connectionId = 1;
+}
+
+message ReadCharRequest {
+	string connectionId = 1;
+	string characteristicId = 2;
+}
+
+message ReadCharResponse {
+	bytes response = 1;
 }

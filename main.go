@@ -43,6 +43,17 @@ func main() {
 	}
 	fmt.Println("Connected to BLE? Id:", bleConn)
 
+	charVal, err := btdaemon.ReadChar(ctx, bleConn, "ff120000000000000000000000000000")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if btapi.IsASCIIPrintable(charVal) {
+		fmt.Printf("Char response: %s\n", string(charVal))
+	} else {
+		fmt.Printf("Char response: %v\n", charVal)
+	}
+
 	dbusConn, err := dbus.SystemBus()
 	if err != nil {
 		log.Fatal(err)

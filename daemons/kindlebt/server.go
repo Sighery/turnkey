@@ -68,9 +68,18 @@ func (c Connection) Close() error {
 	return nil
 }
 
-func checkConnectionExists(id string) bool {
-	_, exists := connections.Load(id)
-	return exists
+func getConnection(id string) (Connection, error) {
+	v, exists := connections.Load(id)
+	if !exists {
+		return Connection{}, fmt.Errorf("No connection %s", id)
+	}
+
+	conn, ok := v.(Connection)
+	if !ok {
+		return Connection{}, fmt.Errorf("Couldn't cast connection %s: %v", id, conn)
+	}
+
+	return conn, nil
 }
 
 type DaemonService struct {
@@ -150,4 +159,35 @@ func (s *DaemonService) ConnectBle(_ context.Context, req *pb.ConnectBleRequest)
 	connection := NewConnection(s.adapter, session, conn)
 	fmt.Println("Connid was", connection.id)
 	return &pb.ConnectBleResponse{ConnectionId: connection.id}, nil
+}
+
+func (s *DaemonService) ReadChar(_ context.Context, req *pb.ReadCharRequest) (
+	*pb.ReadCharResponse, error,
+) {
+	log.Println("Received ReadChar request")
+
+	connId := req.GetConnectionId()
+	charId := req.GetCharacteristicId()
+
+	conn, err := getConnection(connId)
+	if err != nil {
+		return &pb.ReadCharResponse{}, fmt.Errorf("Connection %s not registered: %w", connId, err)
+	}
+
+	uuid, err := kbt.NewCharacteristicUuidFromString(charId)
+	if err != nil {
+		return &pb.ReadCharResponse{}, fmt.Errorf("Characteristic UUID invalid: %w", err)
+	}
+
+	value, err := s.adapter.ReadCharacteristic(conn.session, conn.conn, uuid)
+	if err != nil {
+		return &pb.ReadCharResponse{}, fmt.Errorf("Failed to read characteristic: %w", err)
+	}
+
+	blob, ok := value.Value.(kbt.CharacteristicValueBlob)
+	if !ok {
+		return &pb.ReadCharResponse{}, fmt.Errorf("Non-blob values not implemented")
+	}
+
+	return &pb.ReadCharResponse{Response: blob.V}, nil
 }

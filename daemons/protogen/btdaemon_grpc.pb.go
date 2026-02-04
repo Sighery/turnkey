@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Daemon_IsReady_FullMethodName    = "/btdaemons.Daemon/IsReady"
 	Daemon_ConnectBle_FullMethodName = "/btdaemons.Daemon/ConnectBle"
+	Daemon_ReadChar_FullMethodName   = "/btdaemons.Daemon/ReadChar"
 )
 
 // DaemonClient is the client API for Daemon service.
@@ -31,6 +32,7 @@ const (
 type DaemonClient interface {
 	IsReady(ctx context.Context, in *IsReadyRequest, opts ...grpc.CallOption) (*IsReadyResponse, error)
 	ConnectBle(ctx context.Context, in *ConnectBleRequest, opts ...grpc.CallOption) (*ConnectBleResponse, error)
+	ReadChar(ctx context.Context, in *ReadCharRequest, opts ...grpc.CallOption) (*ReadCharResponse, error)
 }
 
 type daemonClient struct {
@@ -61,6 +63,16 @@ func (c *daemonClient) ConnectBle(ctx context.Context, in *ConnectBleRequest, op
 	return out, nil
 }
 
+func (c *daemonClient) ReadChar(ctx context.Context, in *ReadCharRequest, opts ...grpc.CallOption) (*ReadCharResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReadCharResponse)
+	err := c.cc.Invoke(ctx, Daemon_ReadChar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DaemonServer is the server API for Daemon service.
 // All implementations must embed UnimplementedDaemonServer
 // for forward compatibility.
@@ -69,6 +81,7 @@ func (c *daemonClient) ConnectBle(ctx context.Context, in *ConnectBleRequest, op
 type DaemonServer interface {
 	IsReady(context.Context, *IsReadyRequest) (*IsReadyResponse, error)
 	ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error)
+	ReadChar(context.Context, *ReadCharRequest) (*ReadCharResponse, error)
 	mustEmbedUnimplementedDaemonServer()
 }
 
@@ -84,6 +97,9 @@ func (UnimplementedDaemonServer) IsReady(context.Context, *IsReadyRequest) (*IsR
 }
 func (UnimplementedDaemonServer) ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConnectBle not implemented")
+}
+func (UnimplementedDaemonServer) ReadChar(context.Context, *ReadCharRequest) (*ReadCharResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadChar not implemented")
 }
 func (UnimplementedDaemonServer) mustEmbedUnimplementedDaemonServer() {}
 func (UnimplementedDaemonServer) testEmbeddedByValue()                {}
@@ -142,6 +158,24 @@ func _Daemon_ConnectBle_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_ReadChar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadCharRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).ReadChar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_ReadChar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).ReadChar(ctx, req.(*ReadCharRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Daemon_ServiceDesc is the grpc.ServiceDesc for Daemon service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +190,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ConnectBle",
 			Handler:    _Daemon_ConnectBle_Handler,
+		},
+		{
+			MethodName: "ReadChar",
+			Handler:    _Daemon_ReadChar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

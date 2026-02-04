@@ -47,3 +47,14 @@ func (c *BtdaemonClient) Connect(ctx context.Context, addr string) (string, erro
 
 	return r.GetConnectionId(), nil
 }
+
+func (c *BtdaemonClient) ReadChar(ctx context.Context, conn string, uuid string) ([]byte, error) {
+	r, err := c.service.ReadChar(
+		ctx, &pb.ReadCharRequest{ConnectionId: conn, CharacteristicId: uuid},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetResponse(), nil
+}
