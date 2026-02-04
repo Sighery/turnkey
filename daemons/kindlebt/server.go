@@ -10,6 +10,7 @@ import (
 
 	kbt "github.com/Sighery/gokindlebt"
 	pb "github.com/Sighery/turnkey/daemons/protogen"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -233,5 +234,56 @@ func (s *DaemonService) WriteChar(_ context.Context, req *pb.WriteCharRequest) (
 		}
 
 		return &pb.WriteCharResponse{Response: blob.V}, nil
+	}
+}
+
+func (s *DaemonService) NotifyChar(
+	req *pb.NotifyCharRequest, stream grpc.ServerStreamingServer[pb.NotifyCharResponse],
+) error {
+	log.Println("Received NotifyChar request")
+
+	connId := req.GetConnectionId()
+	charId := req.GetCharacteristicId()
+
+	conn, err := getConnection(connId)
+	if err != nil {
+		return fmt.Errorf("Connection %s not registered: %w", connId, err)
+	}
+
+	uuid, err := kbt.NewCharacteristicUuidFromString(charId)
+	if err != nil {
+		return fmt.Errorf("Characteristic UUID invalid: %w", err)
+	}
+
+	ctx := stream.Context()
+
+	notification, err := s.adapter.NotifyCharacteristic(conn.session, conn.conn, uuid)
+	if err != nil {
+		return fmt.Errorf("Error subscribing to notifications: %w", err)
+	}
+	defer fmt.Println("Closed notification subscription")
+	defer notification.Stop()
+
+	for {
+		select {
+		// Client cancelled the RPC or connection closed
+		case <-ctx.Done():
+			return ctx.Err()
+		case v, ok := <-notification.C:
+			// BLE notification channel closed
+			if !ok {
+				return nil
+			}
+
+			blob, ok := v.Value.(kbt.CharacteristicValueBlob)
+			if !ok {
+				return fmt.Errorf("Non-blob values not implemented")
+			}
+
+			resp := pb.NotifyCharResponse{Response: blob.V}
+			if err := stream.Send(&resp); err != nil {
+				return err
+			}
+		}
 	}
 }

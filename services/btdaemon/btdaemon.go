@@ -9,6 +9,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+type NotifySubscription struct {
+	C    <-chan []byte
+	Stop func()
+}
+
 type BtdaemonClient struct {
 	conn    *grpc.ClientConn
 	service pb.DaemonClient
@@ -77,4 +82,39 @@ func (c *BtdaemonClient) WriteChar(
 	}
 
 	return r.GetResponse(), nil
+}
+
+func (c *BtdaemonClient) NotifyChar(ctx context.Context, connId string, charId string) (
+	*NotifySubscription, error,
+) {
+	cancelCtx, cancel := context.WithCancel(ctx)
+
+	body := &pb.NotifyCharRequest{ConnectionId: connId, CharacteristicId: charId}
+	stream, err := c.service.NotifyChar(cancelCtx, body)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	out := make(chan []byte)
+
+	go func() {
+		defer close(out)
+		for {
+			resp, err := stream.Recv()
+			if err != nil {
+				cancel()
+				return
+			}
+
+			out <- resp.GetResponse()
+		}
+	}()
+
+	return &NotifySubscription{
+		C: out,
+		Stop: func() {
+			cancel()
+		},
+	}, nil
 }

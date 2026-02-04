@@ -23,6 +23,7 @@ const (
 	Daemon_ConnectBle_FullMethodName = "/btdaemons.Daemon/ConnectBle"
 	Daemon_ReadChar_FullMethodName   = "/btdaemons.Daemon/ReadChar"
 	Daemon_WriteChar_FullMethodName  = "/btdaemons.Daemon/WriteChar"
+	Daemon_NotifyChar_FullMethodName = "/btdaemons.Daemon/NotifyChar"
 )
 
 // DaemonClient is the client API for Daemon service.
@@ -35,6 +36,7 @@ type DaemonClient interface {
 	ConnectBle(ctx context.Context, in *ConnectBleRequest, opts ...grpc.CallOption) (*ConnectBleResponse, error)
 	ReadChar(ctx context.Context, in *ReadCharRequest, opts ...grpc.CallOption) (*ReadCharResponse, error)
 	WriteChar(ctx context.Context, in *WriteCharRequest, opts ...grpc.CallOption) (*WriteCharResponse, error)
+	NotifyChar(ctx context.Context, in *NotifyCharRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NotifyCharResponse], error)
 }
 
 type daemonClient struct {
@@ -85,6 +87,25 @@ func (c *daemonClient) WriteChar(ctx context.Context, in *WriteCharRequest, opts
 	return out, nil
 }
 
+func (c *daemonClient) NotifyChar(ctx context.Context, in *NotifyCharRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NotifyCharResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Daemon_ServiceDesc.Streams[0], Daemon_NotifyChar_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[NotifyCharRequest, NotifyCharResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Daemon_NotifyCharClient = grpc.ServerStreamingClient[NotifyCharResponse]
+
 // DaemonServer is the server API for Daemon service.
 // All implementations must embed UnimplementedDaemonServer
 // for forward compatibility.
@@ -95,6 +116,7 @@ type DaemonServer interface {
 	ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error)
 	ReadChar(context.Context, *ReadCharRequest) (*ReadCharResponse, error)
 	WriteChar(context.Context, *WriteCharRequest) (*WriteCharResponse, error)
+	NotifyChar(*NotifyCharRequest, grpc.ServerStreamingServer[NotifyCharResponse]) error
 	mustEmbedUnimplementedDaemonServer()
 }
 
@@ -116,6 +138,9 @@ func (UnimplementedDaemonServer) ReadChar(context.Context, *ReadCharRequest) (*R
 }
 func (UnimplementedDaemonServer) WriteChar(context.Context, *WriteCharRequest) (*WriteCharResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteChar not implemented")
+}
+func (UnimplementedDaemonServer) NotifyChar(*NotifyCharRequest, grpc.ServerStreamingServer[NotifyCharResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method NotifyChar not implemented")
 }
 func (UnimplementedDaemonServer) mustEmbedUnimplementedDaemonServer() {}
 func (UnimplementedDaemonServer) testEmbeddedByValue()                {}
@@ -210,6 +235,17 @@ func _Daemon_WriteChar_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_NotifyChar_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(NotifyCharRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(DaemonServer).NotifyChar(m, &grpc.GenericServerStream[NotifyCharRequest, NotifyCharResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Daemon_NotifyCharServer = grpc.ServerStreamingServer[NotifyCharResponse]
+
 // Daemon_ServiceDesc is the grpc.ServiceDesc for Daemon service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -234,6 +270,12 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Daemon_WriteChar_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "NotifyChar",
+			Handler:       _Daemon_NotifyChar_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "btdaemon.proto",
 }

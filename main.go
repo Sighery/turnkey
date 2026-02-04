@@ -72,6 +72,21 @@ func main() {
 	}
 	fmt.Printf("Write response: %v\n", res)
 
+	i := 0
+	sub, err := btdaemon.NotifyChar(ctx, bleConn, "ff120000000000000000000000000000")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for v := range sub.C {
+		i += 1
+		fmt.Println("Notification, got: %v\n", v)
+
+		if i == 5 {
+			sub.Stop()
+		}
+	}
+
 	dbusConn, err := dbus.SystemBus()
 	if err != nil {
 		log.Fatal(err)
