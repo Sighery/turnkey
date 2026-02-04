@@ -8,7 +8,6 @@ package btdaemons
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Daemon_IsReady_FullMethodName = "/btdaemons.Daemon/IsReady"
+	Daemon_IsReady_FullMethodName    = "/btdaemons.Daemon/IsReady"
+	Daemon_ConnectBle_FullMethodName = "/btdaemons.Daemon/ConnectBle"
 )
 
 // DaemonClient is the client API for Daemon service.
@@ -30,6 +30,7 @@ const (
 // Daemon service
 type DaemonClient interface {
 	IsReady(ctx context.Context, in *IsReadyRequest, opts ...grpc.CallOption) (*IsReadyResponse, error)
+	ConnectBle(ctx context.Context, in *ConnectBleRequest, opts ...grpc.CallOption) (*ConnectBleResponse, error)
 }
 
 type daemonClient struct {
@@ -50,6 +51,16 @@ func (c *daemonClient) IsReady(ctx context.Context, in *IsReadyRequest, opts ...
 	return out, nil
 }
 
+func (c *daemonClient) ConnectBle(ctx context.Context, in *ConnectBleRequest, opts ...grpc.CallOption) (*ConnectBleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConnectBleResponse)
+	err := c.cc.Invoke(ctx, Daemon_ConnectBle_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DaemonServer is the server API for Daemon service.
 // All implementations must embed UnimplementedDaemonServer
 // for forward compatibility.
@@ -57,6 +68,7 @@ func (c *daemonClient) IsReady(ctx context.Context, in *IsReadyRequest, opts ...
 // Daemon service
 type DaemonServer interface {
 	IsReady(context.Context, *IsReadyRequest) (*IsReadyResponse, error)
+	ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error)
 	mustEmbedUnimplementedDaemonServer()
 }
 
@@ -69,6 +81,9 @@ type UnimplementedDaemonServer struct{}
 
 func (UnimplementedDaemonServer) IsReady(context.Context, *IsReadyRequest) (*IsReadyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsReady not implemented")
+}
+func (UnimplementedDaemonServer) ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConnectBle not implemented")
 }
 func (UnimplementedDaemonServer) mustEmbedUnimplementedDaemonServer() {}
 func (UnimplementedDaemonServer) testEmbeddedByValue()                {}
@@ -109,6 +124,24 @@ func _Daemon_IsReady_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_ConnectBle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConnectBleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).ConnectBle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_ConnectBle_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).ConnectBle(ctx, req.(*ConnectBleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Daemon_ServiceDesc is the grpc.ServiceDesc for Daemon service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -119,6 +152,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsReady",
 			Handler:    _Daemon_IsReady_Handler,
+		},
+		{
+			MethodName: "ConnectBle",
+			Handler:    _Daemon_ConnectBle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -37,6 +37,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	bleConn, err := btdaemon.Connect(ctx, "2C:CF:67:B8:DC:3F")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to BLE? Id:", bleConn)
+
 	dbusConn, err := dbus.SystemBus()
 	if err != nil {
 		log.Fatal(err)

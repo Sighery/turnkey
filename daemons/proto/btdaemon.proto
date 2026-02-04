@@ -7,10 +7,19 @@ package btdaemons;
 // Daemon service
 service Daemon {
 	rpc IsReady(IsReadyRequest) returns (IsReadyResponse) {}
+	rpc ConnectBle(ConnectBleRequest) returns (ConnectBleResponse) {}
 }
 
 message IsReadyRequest {}
 
 message IsReadyResponse {
 	bool status = 1;
+}
+
+message ConnectBleRequest {
+	string addr = 1;
+}
+
+message ConnectBleResponse {
+	string connectionId = 1;
 }

@@ -7,12 +7,11 @@
 package btdaemons
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -102,6 +101,94 @@ func (x *IsReadyResponse) GetStatus() bool {
 	return false
 }
 
+type ConnectBleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConnectBleRequest) Reset() {
+	*x = ConnectBleRequest{}
+	mi := &file_btdaemon_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConnectBleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectBleRequest) ProtoMessage() {}
+
+func (x *ConnectBleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_btdaemon_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectBleRequest.ProtoReflect.Descriptor instead.
+func (*ConnectBleRequest) Descriptor() ([]byte, []int) {
+	return file_btdaemon_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ConnectBleRequest) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
+}
+
+type ConnectBleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ConnectionId  string                 `protobuf:"bytes,1,opt,name=connectionId,proto3" json:"connectionId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConnectBleResponse) Reset() {
+	*x = ConnectBleResponse{}
+	mi := &file_btdaemon_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConnectBleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectBleResponse) ProtoMessage() {}
+
+func (x *ConnectBleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_btdaemon_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectBleResponse.ProtoReflect.Descriptor instead.
+func (*ConnectBleResponse) Descriptor() ([]byte, []int) {
+	return file_btdaemon_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ConnectBleResponse) GetConnectionId() string {
+	if x != nil {
+		return x.ConnectionId
+	}
+	return ""
+}
+
 var File_btdaemon_proto protoreflect.FileDescriptor
 
 const file_btdaemon_proto_rawDesc = "" +
@@ -109,9 +196,15 @@ const file_btdaemon_proto_rawDesc = "" +
 	"\x0ebtdaemon.proto\x12\tbtdaemons\"\x10\n" +
 	"\x0eIsReadyRequest\")\n" +
 	"\x0fIsReadyResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\bR\x06status2L\n" +
+	"\x06status\x18\x01 \x01(\bR\x06status\"'\n" +
+	"\x11ConnectBleRequest\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\"8\n" +
+	"\x12ConnectBleResponse\x12\"\n" +
+	"\fconnectionId\x18\x01 \x01(\tR\fconnectionId2\x99\x01\n" +
 	"\x06Daemon\x12B\n" +
-	"\aIsReady\x12\x19.btdaemons.IsReadyRequest\x1a\x1a.btdaemons.IsReadyResponse\"\x00B7Z5github.com/Sighery/turnkey/daemons/protogen/btdaemonsb\x06proto3"
+	"\aIsReady\x12\x19.btdaemons.IsReadyRequest\x1a\x1a.btdaemons.IsReadyResponse\"\x00\x12K\n" +
+	"\n" +
+	"ConnectBle\x12\x1c.btdaemons.ConnectBleRequest\x1a\x1d.btdaemons.ConnectBleResponse\"\x00B7Z5github.com/Sighery/turnkey/daemons/protogen/btdaemonsb\x06proto3"
 
 var (
 	file_btdaemon_proto_rawDescOnce sync.Once
@@ -125,16 +218,20 @@ func file_btdaemon_proto_rawDescGZIP() []byte {
 	return file_btdaemon_proto_rawDescData
 }
 
-var file_btdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_btdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_btdaemon_proto_goTypes = []any{
-	(*IsReadyRequest)(nil),  // 0: btdaemons.IsReadyRequest
-	(*IsReadyResponse)(nil), // 1: btdaemons.IsReadyResponse
+	(*IsReadyRequest)(nil),     // 0: btdaemons.IsReadyRequest
+	(*IsReadyResponse)(nil),    // 1: btdaemons.IsReadyResponse
+	(*ConnectBleRequest)(nil),  // 2: btdaemons.ConnectBleRequest
+	(*ConnectBleResponse)(nil), // 3: btdaemons.ConnectBleResponse
 }
 var file_btdaemon_proto_depIdxs = []int32{
 	0, // 0: btdaemons.Daemon.IsReady:input_type -> btdaemons.IsReadyRequest
-	1, // 1: btdaemons.Daemon.IsReady:output_type -> btdaemons.IsReadyResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: btdaemons.Daemon.ConnectBle:input_type -> btdaemons.ConnectBleRequest
+	1, // 2: btdaemons.Daemon.IsReady:output_type -> btdaemons.IsReadyResponse
+	3, // 3: btdaemons.Daemon.ConnectBle:output_type -> btdaemons.ConnectBleResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -151,7 +248,7 @@ func file_btdaemon_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_btdaemon_proto_rawDesc), len(file_btdaemon_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

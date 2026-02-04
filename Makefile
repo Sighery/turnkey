@@ -43,7 +43,7 @@ define GO_ENV
 endef
 
 .PHONY: build
-build:
+build: build_daemons
 	@mkdir -p $(BIN_DIR)
 	@$(GO_ENV) && go build $(GO_TAGS) -o $(BIN_DIR)/turnkey main.go
 

@@ -35,6 +35,15 @@ func (c *BtdaemonClient) IsReady(ctx context.Context) error {
 		return err
 	}
 
-	log.Printf("BT daemon status: %t", r.GetStatus())
+	log.Printf("BT daemon status: %t\n", r.GetStatus())
 	return nil
+}
+
+func (c *BtdaemonClient) Connect(ctx context.Context, addr string) (string, error) {
+	r, err := c.service.ConnectBle(ctx, &pb.ConnectBleRequest{Addr: addr})
+	if err != nil {
+		return "", err
+	}
+
+	return r.GetConnectionId(), nil
 }
