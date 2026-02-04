@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Daemon_IsReady_FullMethodName    = "/btdaemons.Daemon/IsReady"
-	Daemon_ConnectBle_FullMethodName = "/btdaemons.Daemon/ConnectBle"
-	Daemon_ReadChar_FullMethodName   = "/btdaemons.Daemon/ReadChar"
-	Daemon_WriteChar_FullMethodName  = "/btdaemons.Daemon/WriteChar"
-	Daemon_NotifyChar_FullMethodName = "/btdaemons.Daemon/NotifyChar"
+	Daemon_IsReady_FullMethodName       = "/btdaemons.Daemon/IsReady"
+	Daemon_ConnectBle_FullMethodName    = "/btdaemons.Daemon/ConnectBle"
+	Daemon_DisconnectBle_FullMethodName = "/btdaemons.Daemon/DisconnectBle"
+	Daemon_ReadChar_FullMethodName      = "/btdaemons.Daemon/ReadChar"
+	Daemon_WriteChar_FullMethodName     = "/btdaemons.Daemon/WriteChar"
+	Daemon_NotifyChar_FullMethodName    = "/btdaemons.Daemon/NotifyChar"
 )
 
 // DaemonClient is the client API for Daemon service.
@@ -34,6 +35,7 @@ const (
 type DaemonClient interface {
 	IsReady(ctx context.Context, in *IsReadyRequest, opts ...grpc.CallOption) (*IsReadyResponse, error)
 	ConnectBle(ctx context.Context, in *ConnectBleRequest, opts ...grpc.CallOption) (*ConnectBleResponse, error)
+	DisconnectBle(ctx context.Context, in *DisconnectBleRequest, opts ...grpc.CallOption) (*DisconnectBleResponse, error)
 	ReadChar(ctx context.Context, in *ReadCharRequest, opts ...grpc.CallOption) (*ReadCharResponse, error)
 	WriteChar(ctx context.Context, in *WriteCharRequest, opts ...grpc.CallOption) (*WriteCharResponse, error)
 	NotifyChar(ctx context.Context, in *NotifyCharRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NotifyCharResponse], error)
@@ -61,6 +63,16 @@ func (c *daemonClient) ConnectBle(ctx context.Context, in *ConnectBleRequest, op
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ConnectBleResponse)
 	err := c.cc.Invoke(ctx, Daemon_ConnectBle_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *daemonClient) DisconnectBle(ctx context.Context, in *DisconnectBleRequest, opts ...grpc.CallOption) (*DisconnectBleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DisconnectBleResponse)
+	err := c.cc.Invoke(ctx, Daemon_DisconnectBle_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +126,7 @@ type Daemon_NotifyCharClient = grpc.ServerStreamingClient[NotifyCharResponse]
 type DaemonServer interface {
 	IsReady(context.Context, *IsReadyRequest) (*IsReadyResponse, error)
 	ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error)
+	DisconnectBle(context.Context, *DisconnectBleRequest) (*DisconnectBleResponse, error)
 	ReadChar(context.Context, *ReadCharRequest) (*ReadCharResponse, error)
 	WriteChar(context.Context, *WriteCharRequest) (*WriteCharResponse, error)
 	NotifyChar(*NotifyCharRequest, grpc.ServerStreamingServer[NotifyCharResponse]) error
@@ -132,6 +145,9 @@ func (UnimplementedDaemonServer) IsReady(context.Context, *IsReadyRequest) (*IsR
 }
 func (UnimplementedDaemonServer) ConnectBle(context.Context, *ConnectBleRequest) (*ConnectBleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConnectBle not implemented")
+}
+func (UnimplementedDaemonServer) DisconnectBle(context.Context, *DisconnectBleRequest) (*DisconnectBleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisconnectBle not implemented")
 }
 func (UnimplementedDaemonServer) ReadChar(context.Context, *ReadCharRequest) (*ReadCharResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadChar not implemented")
@@ -199,6 +215,24 @@ func _Daemon_ConnectBle_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_DisconnectBle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisconnectBleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).DisconnectBle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_DisconnectBle_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).DisconnectBle(ctx, req.(*DisconnectBleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Daemon_ReadChar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadCharRequest)
 	if err := dec(in); err != nil {
@@ -260,6 +294,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ConnectBle",
 			Handler:    _Daemon_ConnectBle_Handler,
+		},
+		{
+			MethodName: "DisconnectBle",
+			Handler:    _Daemon_DisconnectBle_Handler,
 		},
 		{
 			MethodName: "ReadChar",

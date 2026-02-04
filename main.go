@@ -47,6 +47,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer btdaemon.Disconnect(ctx, bleConn)
 	fmt.Println("Connected to BLE? Id:", bleConn)
 
 	charVal, err := btdaemon.ReadChar(ctx, bleConn, "ff120000000000000000000000000000")

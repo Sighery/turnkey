@@ -53,6 +53,11 @@ func (c *BtdaemonClient) Connect(ctx context.Context, addr string) (string, erro
 	return r.GetConnectionId(), nil
 }
 
+func (c *BtdaemonClient) Disconnect(ctx context.Context, connId string) error {
+	_, err := c.service.DisconnectBle(ctx, &pb.DisconnectBleRequest{ConnectionId: connId})
+	return err
+}
+
 func (c *BtdaemonClient) ReadChar(ctx context.Context, connId string, charId string) (
 	[]byte, error,
 ) {

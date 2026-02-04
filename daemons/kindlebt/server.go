@@ -162,6 +162,26 @@ func (s *DaemonService) ConnectBle(_ context.Context, req *pb.ConnectBleRequest)
 	return &pb.ConnectBleResponse{ConnectionId: connection.id}, nil
 }
 
+func (s *DaemonService) DisconnectBle(_ context.Context, req *pb.DisconnectBleRequest) (
+	*pb.DisconnectBleResponse, error,
+) {
+	log.Println("Received DisconnectBle request")
+
+	res := &pb.DisconnectBleResponse{}
+	connId := req.GetConnectionId()
+
+	conn, err := getConnection(connId)
+	if err != nil {
+		return res, fmt.Errorf("Connection %s not registered: %w", connId, err)
+	}
+
+	if err := conn.Close(); err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
 func (s *DaemonService) ReadChar(_ context.Context, req *pb.ReadCharRequest) (
 	*pb.ReadCharResponse, error,
 ) {
