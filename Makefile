@@ -4,6 +4,10 @@ GO_TAGS := -tags netgo
 STATIC ?= 1
 BIN_DIR := bin
 
+GO_SRC := actions services devices
+GO_FILES := $(shell find $(GO_SRC) -type f -name '*.go') main.go go.mod
+BINARY := $(BIN_DIR)/turnkey
+
 ifeq ($(STATIC), 1)
 	KINDLEBT_LIB = -l:libkindlebt.a -lX11 -lace_bt -ldl -lpthread -llogc
 else
@@ -42,10 +46,19 @@ define GO_ENV
 	export CGO_LDFLAGS="-L$(KINDLEBT_TARGET_PATH)/ $(KINDLEBT_LIB)"
 endef
 
-.PHONY: build
-build: build_daemons
+.PHONY: all
+all: $(BINARY) build_daemons
+
+$(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
-	@$(GO_ENV) && go build $(GO_TAGS) -o $(BIN_DIR)/turnkey main.go
+
+$(GO_FILES): | $(BIN_DIR)
+
+$(BINARY): $(GO_FILES)
+	@$(GO_ENV) && go build $(GO_TAGS) -o $(BINARY) main.go
+
+.PHONY: build
+build: $(BINARY)
 
 .PHONY: build_daemon
 build_daemon:
@@ -59,7 +72,7 @@ build_daemons:
 
 .PHONY: build_tests
 build_tests:
-	@$(GO_ENV) && go test $(GO_TAGS) -c ./...
+	@$(GO_ENV) && go test $(GO_TAGS) -c -o $(BIN_DIR)/ ./...
 
 .PHONY: vet
 vet:

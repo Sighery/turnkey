@@ -22,9 +22,8 @@ $(PROTOGEN_OUT)/%.pb.go: $(PROTO_SRC)/%.proto
 		--go-grpc_out=$(PROTOGEN_OUT) --go-grpc_opt=paths=source_relative \
 		$<
 
-$(BIN_DIR)/%_daemon: %/*.go $(PROTOGEN_FILES)
+$(BIN_DIR)/%_daemon: %/*.go $(PROTOGEN_FILES) go.mod go.sum
 	@echo "Building daemon $*"
-	@mkdir -p $(BIN_DIR)
 	@$(MAKE) --no-print-directory -C .. GO_TARGET=$* build_daemon
 
 .PHONY: clean
