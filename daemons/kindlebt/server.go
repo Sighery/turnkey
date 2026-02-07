@@ -199,6 +199,7 @@ func (s *DaemonService) ReadChar(_ context.Context, req *pb.ReadCharRequest) (
 	if err != nil {
 		return &pb.ReadCharResponse{}, fmt.Errorf("Characteristic UUID invalid: %w", err)
 	}
+	uuid = LittleEndianUUID(uuid)
 
 	value, err := s.adapter.ReadCharacteristic(conn.session, conn.conn, uuid)
 	if err != nil {
@@ -232,6 +233,7 @@ func (s *DaemonService) WriteChar(_ context.Context, req *pb.WriteCharRequest) (
 	if err != nil {
 		return &pb.WriteCharResponse{}, fmt.Errorf("Characteristic UUID invalid: %w", err)
 	}
+	uuid = LittleEndianUUID(uuid)
 
 	value := kbt.CharacteristicValueBlob{V: data}
 
@@ -274,6 +276,7 @@ func (s *DaemonService) NotifyChar(
 	if err != nil {
 		return fmt.Errorf("Characteristic UUID invalid: %w", err)
 	}
+	uuid = LittleEndianUUID(uuid)
 
 	ctx := stream.Context()
 
