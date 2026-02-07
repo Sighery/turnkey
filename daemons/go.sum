@@ -1,5 +1,5 @@
-github.com/Sighery/gokindlebt v0.0.0-20251206165106-2c361fb7f14e h1:DlVWtewbbWzyIU5c/rs09ADVU9GLMnhQafJY2lrVsUY=
-github.com/Sighery/gokindlebt v0.0.0-20251206165106-2c361fb7f14e/go.mod h1:TWIIIqt4QTMpgGHiTA9NgWRtLKOYweJCPxq/YhXFl+M=
+github.com/Sighery/gokindlebt v0.0.0-20260205173520-8b748ea3d0e4 h1:kmoLRYxjkxyBvh5PlAN/sNb+m+xNJeHUH/+N/iG/gcI=
+github.com/Sighery/gokindlebt v0.0.0-20260205173520-8b748ea3d0e4/go.mod h1:Za3aLwykbT3LDSXSyWxN+FNbLFYSV3m0izHpBKpO5kY=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=

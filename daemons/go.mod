@@ -3,7 +3,7 @@ module github.com/Sighery/turnkey/daemons
 go 1.25.3
 
 require (
-	github.com/Sighery/gokindlebt v0.0.0-20251206165106-2c361fb7f14e
+	github.com/Sighery/gokindlebt v0.0.0-20260205173520-8b748ea3d0e4
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
