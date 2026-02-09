@@ -16,6 +16,7 @@ var (
 var (
 	CommandBlinkTwice byte = 16
 	CommandCamera     byte = 2
+	CommandRawSensor  byte = 161
 )
 
 type CameraAction int
@@ -29,6 +30,52 @@ const (
 	ActionKeepScreenOn
 	ActionDisableCameraGesture
 )
+
+type RawSensorAction int
+
+const (
+	_ RawSensorAction = iota
+	_
+	ActionDisableRawSensor
+	_
+	ActionEnableRawSensor
+)
+
+type CommandResponse interface {
+	Type() byte
+}
+
+type CameraResponse struct {
+	Action CameraAction
+}
+
+func (CameraResponse) Type() byte { return CommandCamera }
+
+type SensorSpo2Response struct {
+	Spo2     uint16
+	Spo2Max  uint8
+	Spo2Min  uint8
+	Spo2Diff uint8
+}
+
+func (SensorSpo2Response) Type() byte { return CommandRawSensor }
+
+type SensorPpgResponse struct {
+	Ppg     uint16
+	PpgMax  uint16
+	PpgMin  uint16
+	PpgDiff uint16
+}
+
+func (SensorPpgResponse) Type() byte { return CommandRawSensor }
+
+type SensorAccelerometerResponse struct {
+	X int16
+	Y int16
+	Z int16
+}
+
+func (SensorAccelerometerResponse) Type() byte { return CommandRawSensor }
 
 func MakePacket(command byte, data []byte) ([]byte, error) {
 	if len(data) > 14 {
@@ -52,22 +99,6 @@ func MakePacket(command byte, data []byte) ([]byte, error) {
 	return packet[:], nil
 }
 
-func BlinkTwiceRequest() []byte {
-	packet, err := MakePacket(CommandBlinkTwice, []byte{})
-	if err != nil {
-		panic(fmt.Sprintf("Not supposed to reach this: %s", err))
-	}
-	return packet
-}
-
-func CameraActionRequest(action CameraAction) []byte {
-	packet, err := MakePacket(CommandCamera, []byte{byte(action)})
-	if err != nil {
-		panic(fmt.Sprintf("Not supposed to reach this: %s", err))
-	}
-	return packet
-}
-
 func CheckCrc(data []byte) bool {
 	if len(data) != 16 {
 		return false
@@ -85,16 +116,86 @@ func CheckCrc(data []byte) bool {
 	return true
 }
 
-func CameraActionResponse(data []byte) (CameraAction, error) {
+func ParseCameraResponse(data []byte) CameraResponse {
+	return CameraResponse{Action: CameraAction(data[1])}
+}
+
+func ParseSpo2Response(data []byte) SensorSpo2Response {
+	return SensorSpo2Response{
+		Spo2:     ((uint16)(data[2]) << 8) | uint16(data[3]),
+		Spo2Max:  (uint8)(data[5]),
+		Spo2Min:  (uint8)(data[7]),
+		Spo2Diff: (uint8)(data[9]),
+	}
+}
+
+func ParsePpgResponse(data []byte) SensorPpgResponse {
+	return SensorPpgResponse{
+		Ppg:     ((uint16)(data[2]) << 8) | uint16(data[3]),
+		PpgMax:  ((uint16)(data[4]) << 8) | uint16(data[5]),
+		PpgMin:  ((uint16)(data[6]) << 8) | uint16(data[7]),
+		PpgDiff: ((uint16)(data[8]) << 8) | uint16(data[9]),
+	}
+}
+
+func ParseAccelerometerData(data []byte) SensorAccelerometerResponse {
+	x := int16((int16(data[6]) << 4) | (int16(data[7]) & 0x0F))
+	if x&0x800 != 0 {
+		x -= 1 << 12
+	}
+
+	y := int16((int16(data[2]) << 4) | (int16(data[3]) & 0x0F))
+	if y&0x800 != 0 {
+		y -= 1 << 12
+	}
+
+	z := int16((int16(data[4]) << 4) | (int16(data[5]) & 0x0F))
+	if z&0x800 != 0 {
+		z -= 1 << 12
+	}
+
+	return SensorAccelerometerResponse{X: x, Y: y, Z: z}
+}
+
+func ParseCommandResponse(data []byte) (CommandResponse, error) {
 	if !CheckCrc(data) {
-		return CameraAction(0), fmt.Errorf("invalid crc or length: % x", data)
+		return CameraResponse{}, fmt.Errorf("invalid length or crc: % x", data)
 	}
 
-	if data[0] != CommandCamera {
-		return CameraAction(0), fmt.Errorf("packet is not for camera data: %x", data[0])
+	switch {
+	case data[0] == CommandCamera:
+		return ParseCameraResponse(data), nil
+	case data[0] == CommandRawSensor && data[1] == 0x01:
+		return ParseSpo2Response(data), nil
+	case data[0] == CommandRawSensor && data[1] == 0x02:
+		return ParsePpgResponse(data), nil
+	case data[0] == CommandRawSensor && data[1] == 0x03:
+		return ParseAccelerometerData(data), nil
 	}
 
-	action := CameraAction(data[1])
+	return CameraResponse{}, fmt.Errorf("Command not yet implemented: % x", data)
+}
 
-	return action, nil
+func RawSensorsRequest(action RawSensorAction) []byte {
+	packet, err := MakePacket(CommandRawSensor, []byte{byte(action)})
+	if err != nil {
+		panic(fmt.Sprintf("Not supposed to reach this: %s", err))
+	}
+	return packet
+}
+
+func BlinkTwiceRequest() []byte {
+	packet, err := MakePacket(CommandBlinkTwice, []byte{})
+	if err != nil {
+		panic(fmt.Sprintf("Not supposed to reach this: %s", err))
+	}
+	return packet
+}
+
+func CameraActionRequest(action CameraAction) []byte {
+	packet, err := MakePacket(CommandCamera, []byte{byte(action)})
+	if err != nil {
+		panic(fmt.Sprintf("Not supposed to reach this: %s", err))
+	}
+	return packet
 }

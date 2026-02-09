@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"github.com/godbus/dbus/v5"
 
 	"github.com/Sighery/turnkey/actions"
+	"github.com/Sighery/turnkey/devices/colmi"
 	btapi "github.com/Sighery/turnkey/services/btdaemon"
 	lipcapi "github.com/Sighery/turnkey/services/lipc"
 	wtitle "github.com/Sighery/turnkey/services/windowtitles"
@@ -43,47 +43,59 @@ func main() {
 		log.Fatal(err)
 	}
 
-	bleConn, err := btdaemon.Connect(ctx, "2C:CF:67:B8:DC:3F")
+	bleConn, err := btdaemon.Connect(ctx, "32:32:41:36:C8:04")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer btdaemon.Disconnect(ctx, bleConn)
 	fmt.Println("Connected to BLE? Id:", bleConn)
 
-	charVal, err := btdaemon.ReadChar(ctx, bleConn, "ff120000000000000000000000000000")
+	res, err := btdaemon.WriteChar(
+		ctx, bleConn, colmi.CommandWriteUUID, true, colmi.BlinkTwiceRequest(),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("Write response: % x\n", res)
 
-	if btapi.IsASCIIPrintable(charVal) {
-		fmt.Printf("Char response: %s\n", string(charVal))
-	} else {
-		fmt.Printf("Char response: %v\n", charVal)
-	}
-
-	var toWrite []byte
-	if bytes.Equal(charVal, OffVal) {
-		toWrite = OnVal
-	} else {
-		toWrite = OffVal
-	}
-	res, err := btdaemon.WriteChar(ctx, bleConn, "ff120000000000000000000000000000", true, toWrite)
+	res, err = btdaemon.WriteChar(
+		ctx, bleConn, colmi.CommandWriteUUID, true,
+		colmi.RawSensorsRequest(colmi.ActionEnableRawSensor),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Write response: %v\n", res)
+	fmt.Printf("Write response: % x\n", res)
+	defer btdaemon.WriteChar(
+		ctx, bleConn, colmi.CommandWriteUUID, true,
+		colmi.RawSensorsRequest(colmi.ActionDisableRawSensor),
+	)
+	defer btdaemon.WriteChar(
+		ctx, bleConn, colmi.CommandWriteUUID, true,
+		colmi.CameraActionRequest(colmi.ActionDisableCameraGesture),
+	)
+
+	sub, err := btdaemon.NotifyChar(ctx, bleConn, colmi.CommandReadUUID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	i := 0
-	sub, err := btdaemon.NotifyChar(ctx, bleConn, "ff120000000000000000000000000000")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	for v := range sub.C {
 		i += 1
-		fmt.Println("Notification, got: %v\n", v)
+		data, err := colmi.ParseCommandResponse(v)
+		if err != nil {
+			fmt.Printf("Error parsing command response: %s\n", err)
+			continue
+		}
 
-		if i == 5 {
+		if acc, ok := data.(colmi.SensorAccelerometerResponse); ok {
+			fmt.Printf("Accelerometer packet: %+v\n", acc)
+		} else {
+			fmt.Printf("Some other command response: %+v\n", data)
+		}
+
+		if i == 100 {
 			sub.Stop()
 		}
 	}
